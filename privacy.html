@@ -2,16 +2,129 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>FanxInfos 隐私政策</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#020202">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="繁星不语隐私声明：零数据收集。零云端传输。100% 纯单机架构。">
+
+    <title>隐私声明 | 繁星不语</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== 全局设置 ==================== */
+        :root {
+            --bg-color: #020202;
+            --core-green: #00FF41;
+            --text-grey: #888;
+            --font-mono: 'JetBrains Mono', monospace, 'Microsoft YaHei';
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; min-height: 100%;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at center, #0a0a0a 0%, #000 85%);
+            font-family: var(--font-mono); color: #ccc;
+            display: flex; flex-direction: column;
+        }
+
+        /* ==================== 1. 顶部导航栏 (与主页一致) ==================== */
+        header {
+            flex: 0 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 48px; 
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .logo { 
+            font-family: var(--font-mono); font-weight: 800; font-size: 1.2rem; 
+            letter-spacing: -1px; color: #ffffff; text-transform: uppercase; 
+            text-decoration: none; cursor: pointer; transition: opacity 0.3s;
+        }
+        .logo:hover { opacity: 0.8; }
+
+        nav ul { display: flex; list-style: none; gap: 32px; margin: 0; padding: 0; align-items: center; }
+        nav a { text-decoration: none; color: #555; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; transition: all 0.3s; }
+        nav a:hover { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
+        nav a.active { color: var(--core-green); text-shadow: 0 0 8px rgba(0, 255, 65, 0.4); }
+
+        /* ==================== 2. 主体内容 ==================== */
+        main {
+            flex: 1; display: flex; flex-direction: column;
+            padding: 60px 20px; max-width: 720px; margin: 0 auto; width: 100%;
+            font-size: 14px; line-height: 1.8; color: #bbbbbb;
+            box-sizing: border-box;
+        }
+
+        .update-time { font-size: 0.8rem; color: #666; margin-bottom: 30px; letter-spacing: 1px; }
+
+        .section-title { color: #fff; margin-bottom: 15px; display: block; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-top: 40px; border-left: 3px solid var(--core-green); padding-left: 10px; }
+        .section-title:first-of-type { margin-top: 0; }
+        
+        p { margin-bottom: 20px; text-align: justify; letter-spacing: 0.5px; }
+        
+        .highlight { color: var(--core-green); font-weight: 700; }
+
+        /* ==================== 移动端专属适配 ==================== */
+        @media (max-width: 900px) {
+            header { 
+                padding: 15px 15px; 
+                flex-direction: column; 
+                gap: 15px; 
+                align-items: center; 
+            }
+            
+            nav { width: 100%; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; display: flex; justify-content: center; }
+            nav ul { 
+                display: flex; 
+                gap: 20px; 
+                width: max-content; 
+                padding: 0 10px; 
+                margin: 0; 
+            }
+            nav a { font-size: 0.8rem; font-weight: 600; white-space: nowrap; color: #999; }
+
+            main { padding: 40px 20px; width: 100%; }
+        }
+    </style>
 </head>
 <body>
-    <h1>FanxInfos 隐私政策声明</h1>
-    <p>更新日期：2026年5月10日</p>
-    <p>本应用（FanxInfos）为单机运行环境。我们郑重承诺：</p>
-    <ul>
-        <li>我们不收集您的任何个人信息。</li>
-        <li>我们不连接任何云端服务器上传您的数据。</li>
-        <li>您产生的所有数据均保存在您的本地设备中。</li>
-    </ul>
+    <header>
+        <a href="index.html" class="logo">繁星不语</a>
+        <nav>
+            <ul>
+                <li><a href="privacy.html" class="active">隐私声明</a></li>
+                <li><a href="contact.html">联系我们</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="update-time">生效日期：2026年5月10日</div>
+
+        <span class="section-title">1. 零数据收集</span>
+        <p>繁星不语（本应用）基于“零知识架构”设计。我们不收集、不存储、不共享、也不传输任何您的个人数据、语音记录或文本转录内容。</p>
+
+        <span class="section-title">2. 物理网络隔离</span>
+        <p>本应用在系统底层<span class="highlight">已明确移除所有网络权限</span>。从技术原理上，本应用完全不具备向任何云端服务器传输数据的能力。</p>
+
+        <span class="section-title">3. 本地处理与麦克风权限说明</span>
+        <p>所有的语音识别均基于应用内置的双 AI 引擎在您的设备上进行本地推理。<span class="highlight">您的语音数据永远不会离开您设备的内存（RAM）。</span></p>
+        <p>为了实现核心功能，本应用需要获取您设备的“麦克风权限”。该权限仅被严格用于捕捉音频以进行实时的本地转录。音频流在内存中被即时处理完毕后会自动销毁，绝不会被保存到设备存储中，更不会被向外传输。</p>
+
+        <span class="section-title">4. 支付与交易信息</span>
+        <p>我们不处理任何支付行为，也不存储任何信用卡信息。所有的交易均由应用商店（如华为应用市场）的官方计费系统安全处理。我们仅接收来自应用商店的匿名购买凭证以验证您的授权状态，我们无法获取您的真实身份信息。</p>
+
+        <span class="section-title">5. 分析与日志记录</span>
+        <p>本应用未集成任何第三方分析 SDK（例如 Google Analytics 或友盟）。本应用不会生成任何会被传输到设备外部的使用日志。</p>
+
+        <span class="section-title">6. 数据的删除与重置</span>
+        <p>由于我们从未收集、存储或向我们的服务器传输过任何用户数据，因此不存在需要向我们申请“删除用户数据”的情况。如果您希望清除本地的使用记录（如您的偏好设置），只需在系统中卸载本应用，或清除本应用的存储数据即可。</p>
+
+        <span class="section-title">7. 开发者联系方式</span>
+        <p>如对本隐私声明有任何合规性疑问，请联系：<a href="mailto:lucas@fanxingos.com" style="color: var(--core-green); text-decoration: none;">lucas@fanxingos.com</a></p>
+    </main>
 </body>
 </html>
