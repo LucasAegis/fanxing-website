@@ -1,0 +1,34 @@
+/* shared/global.css */
+:root {
+    --bg-color: #f8fafc; 
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --brand-purple: #8A2BE2;
+    --brand-green: #10b981;
+    --font-family: 'Inter', 'Noto Sans SC', sans-serif;
+}
+
+body, html {
+    margin: 0; padding: 0; width: 100%;
+    background-color: var(--bg-color);
+    font-family: var(--font-family);
+    color: var(--text-main);
+    scroll-behavior: smooth;
+}
+
+/* 统一导航栏样式 */
+header {
+    position: fixed; top: 0; left: 0; width: 100%; height: 72px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 50px; box-sizing: border-box;
+    background: rgba(248, 250, 252, 0.3); 
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    z-index: 1000;
+}
+
+.logo-text { font-size: 1.4rem; font-weight: 800; color: var(--brand-purple); letter-spacing: 2px; text-decoration: none; }
+nav ul { display: flex; list-style: none; gap: 30px; margin: 0; padding: 0; }
+nav li a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; transition: color 0.3s; }
+nav li a:hover, nav li a.active { color: var(--brand-purple); }
+
+@media (max-width: 900px) { header { padding: 0 20px; } }
