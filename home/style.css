@@ -1,0 +1,38 @@
+/* 首屏居中文字 */
+.hero {
+    width: 100%; height: 80vh; min-height: 600px; 
+    padding-top: 72px; box-sizing: border-box;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    pointer-events: none; /* 让鼠标穿透文字操作3D */
+}
+
+.hero-text { text-align: center; }
+.hero-text h1 { font-size: 4rem; font-weight: 800; letter-spacing: 6px; margin: 0 0 20px 0; }
+.hero-text p { font-size: 1.2rem; color: var(--text-muted); letter-spacing: 2px; margin: 0 auto; max-width: 600px; line-height: 1.6; }
+
+/* 核心功能卡片区 */
+.features-section {
+    padding: 80px 20px; max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px;
+    pointer-events: auto;
+}
+
+.feature-card {
+    background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 20px; padding: 40px 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.feature-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06); }
+
+.card-icon-dot { width: 48px; height: 48px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; }
+.bg-green { background: rgba(16, 185, 129, 0.1); }
+.bg-blue { background: rgba(59, 130, 246, 0.1); }
+.bg-purple { background: rgba(138, 43, 226, 0.1); }
+
+.feature-card h3 { font-size: 1.3rem; margin: 0 0 15px 0; }
+.feature-card p { font-size: 0.95rem; line-height: 1.6; color: var(--text-muted); margin: 0; }
+
+footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(0,0,0,0.05); color: var(--text-muted); font-size: 0.85rem; }
+
+@media (max-width: 900px) { .features-section { grid-template-columns: 1fr; } .hero-text h1 { font-size: 2.5rem; } }
