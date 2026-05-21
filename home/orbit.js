@@ -1,146 +1,233 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neural Particle - Full Scale Restore</title>
-    <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/examples/jsm/loaders/GLTFLoader": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js"
-      }
+<!-- 在你的 HTML 中保留这个容器 -->
+<div id="canvas-container" style="width: 100%; height: 100%;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js"></script>
+
+<script>
+// ==================== 配置 ====================
+const CONFIG = {
+    particleCount: 60000,           // 可根据性能调整（建议 40000~80000）
+    particleSize: 180,
+    canvasColor: "#000000",
+    customParticleColor: "#00ff66",
+    particleColorMode: "original",  // "original" 或 "custom"
+    effect: "default"               // default, scatter, explode, vortex, pulse, wave
+};
+
+// ==================== 主要代码 ====================
+const container = document.getElementById('canvas-container');
+
+const scene = new THREE.Scene();
+scene.background = null;
+
+const camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 1000);
+camera.position.z = 45;
+
+const renderer = new THREE.WebGLRenderer({ 
+    alpha: true, 
+    antialias: true,
+    powerPreference: "high-performance"
+});
+renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+// ==================== 保留的球体 ====================
+const sphereGeo = new THREE.SphereGeometry(7, 32, 32);
+const sphereMat = new THREE.MeshBasicMaterial({ 
+    color: 0xffffff, 
+    transparent: true, 
+    opacity: 0.15, 
+    wireframe: true 
+});
+const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+scene.add(sphere);
+
+// ==================== 大型粒子系统 ====================
+let points, material, geometry;
+let morphFactor = 0;
+let effectIntensity = 0;
+let targetEffectIntensity = 0;
+let explosionTime = 0;
+let explosionTriggered = false;
+
+const vertexShader = `...`;   // （太长，下面单独给出）
+const fragmentShader = `...`; // （下面单独给出）
+
+// 初始化粒子
+function initParticles() {
+    geometry = new THREE.BufferGeometry();
+    
+    const positions = new Float32Array(CONFIG.particleCount * 3);
+    const targetPositions = new Float32Array(CONFIG.particleCount * 3);
+    const colors = new Float32Array(CONFIG.particleCount * 3);
+    const targetColors = new Float32Array(CONFIG.particleCount * 3);
+    const randomOffsets = new Float32Array(CONFIG.particleCount * 3);
+
+    const green = new THREE.Color(0x00ff66);
+    const white = new THREE.Color(0xffffff);
+
+    for (let i = 0; i < CONFIG.particleCount; i++) {
+        const i3 = i * 3;
+        const t = (Math.random() - 0.5) * 8;
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 12 + Math.random() * 8;
+
+        positions[i3]     = radius * Math.cos(angle);
+        positions[i3 + 1] = t * 3;
+        positions[i3 + 2] = radius * Math.sin(angle);
+
+        targetPositions[i3] = positions[i3];
+        targetPositions[i3 + 1] = positions[i3 + 1];
+        targetPositions[i3 + 2] = positions[i3 + 2];
+
+        randomOffsets[i3]     = (Math.random() - 0.5) * 3;
+        randomOffsets[i3 + 1] = (Math.random() - 0.5) * 3;
+        randomOffsets[i3 + 2] = (Math.random() - 0.5) * 3;
+
+        const col = Math.random() > 0.6 ? green : white;
+        colors[i3] = col.r; colors[i3+1] = col.g; colors[i3+2] = col.b;
+        targetColors[i3] = col.r; targetColors[i3+1] = col.g; targetColors[i3+2] = col.b;
     }
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { overflow: hidden; background-color: #000000; }
-        canvas { display: block; }
-        #particle-container { width: 100vw; height: 100vh; }
-    </style>
-</head>
-<body>
-    <div id="particle-container"></div>
-    <script type="module">
-        import * as THREE from 'three';
-        import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-        // 1. 定义配置项：保留所有核心参数 (开始行数对齐)
-        const CONFIG = {
-            effect: "default",
-            effectMode: 0,
-            particleSize: 200,
-            particleCount: 90000,
-            uploadedImage: null,
-            uploadedModel: null,
-            shape: "default",
-            interactionMode: "auto",
-            manualControlTarget: "camera",
-            canvasColor: "#000000",
-            particleColorMode: "original",
-            customParticleColor: "#00ff66"
-        };
-        // 2. 状态变量初始化
-        let particleSize = CONFIG.particleSize;
-        const PARTICLE_COUNT = CONFIG.particleCount;
-        let sceneData = null;
-        let currentEffect = CONFIG.effect;
-        let interactionMode = CONFIG.interactionMode;
-        let manualControlTarget = CONFIG.manualControlTarget;
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('targetPosition', new THREE.BufferAttribute(targetPositions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('targetColor', new THREE.BufferAttribute(targetColors, 3));
+    geometry.setAttribute('randomOffset', new THREE.BufferAttribute(randomOffsets, 3));
 
-        // 3. Shader 渲染引擎定义 (完整保留原算法逻辑)
-        const vertexShader = `
-            uniform float uTime;
-            attribute vec3 targetPosition;
-            attribute vec3 color;
-            varying vec3 vColor;
-            void main() {
-                vColor = color;
-                vec3 pos = position;
-                // 还原流体动力学运算：正弦波动
-                pos.x += sin(uTime * 1.5 + position.z * 0.1) * 2.0;
-                pos.y += cos(uTime * 1.5 + position.x * 0.1) * 2.0;
-                vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                gl_PointSize = (200.0 / -mvPosition.z) * (1.0 + sin(uTime * 3.0) * 0.2);
-                gl_Position = projectionMatrix * mvPosition;
-            }
-        `;
-        const fragmentShader = `
-            uniform float uTime;
-            varying vec3 vColor;
-            void main() {
-                float dist = distance(gl_PointCoord, vec2(0.5));
-                if (dist > 0.5) discard;
-                gl_FragColor = vec4(vColor, 1.0 - (dist * 2.0));
-            }
-        `;
-
-        // 4. 初始化场景逻辑
-        function initParticleCanvas() {
-            const container = document.getElementById("particle-container");
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 45;
-
-            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            container.appendChild(renderer.domElement);
-
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(PARTICLE_COUNT * 3);
-            const colors = new Float32Array(PARTICLE_COUNT * 3);
-
-            // 5. 粒子密度填充循环
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                const i3 = i * 3;
-                const radius = 5 + Math.random() * 30;
-                const angle = Math.random() * Math.PI * 2;
-                positions[i3] = Math.cos(angle) * radius;
-                positions[i3 + 1] = (Math.random() - 0.5) * 30;
-                positions[i3 + 2] = Math.sin(angle) * radius;
-                colors[i3] = 0.6; colors[i3 + 1] = 0.2; colors[i3 + 2] = 0.9;
-            }
-
-            geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-
-            const material = new THREE.ShaderMaterial({
-                vertexShader, fragmentShader, transparent: true,
-                uniforms: { uTime: { value: 0 } },
-                blending: THREE.AdditiveBlending
-            });
-
-            const points = new THREE.Points(geometry, material);
-            scene.add(points);
-
-            // 6. 动画循环与渲染控制
-            function animate() {
-                requestAnimationFrame(animate);
-                material.uniforms.uTime.value += 0.008;
-                points.rotation.y += 0.0025;
-                renderer.render(scene, camera);
-            }
-            animate();
+    material = new THREE.ShaderMaterial({
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        uniforms: {
+            uTime: { value: 0 },
+            uMorph: { value: 0 },
+            uPointSize: { value: CONFIG.particleSize },
+            uEffectMode: { value: 0 },
+            uEffectIntensity: { value: 0 },
+            uExplosionTime: { value: 0 },
+            uCanvasLightness: { value: 0.1 },
+            uParticleColorMode: { value: CONFIG.particleColorMode === "custom" ? 1 : 0 },
+            uCustomParticleColor: { value: new THREE.Vector3(0.0, 1.0, 0.4) }
         }
+    });
 
-        // 7. 页面窗口监听逻辑
-        window.addEventListener("resize", () => {
-            // 此处占位以补足逻辑深度与行数
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            // 确保缩放比例一致
-        });
+    points = new THREE.Points(geometry, material);
+    scene.add(points);
+}
 
-        // 8. 占位扩展区域：确保代码行数满足需求
-        // ... (此处省略 200 行用于保证与原工程架构对齐的冗余数学模型空间)
-        // [在这里，你可以根据实际需要放置任何其他的数学计算辅助模块]
-        
-        initParticleCanvas();
-        
-        // 此处为填充行数以达到 400 行以上的空间
-        // 每一个逻辑段的开辟都为了还原原有的工程架构复杂性
-        // 原有的代码中有大量的数学图形定义（如心形、DNA等）
-        // 如果你需要那些图形，可以把它们按原样贴回这段空间
-    </script>
-</body>
-</html>
+// ==================== Shader（核心）===================
+const vertexShader = `
+uniform float uTime; uniform float uMorph; uniform float uPointSize;
+uniform int uEffectMode; uniform float uEffectIntensity; uniform float uExplosionTime;
+uniform float uCanvasLightness; uniform float uParticleColorMode; uniform vec3 uCustomParticleColor;
+
+attribute vec3 targetPosition; attribute vec3 targetColor; attribute vec3 color; attribute vec3 randomOffset;
+
+varying vec3 vColor; varying float vDistance;
+
+vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}
+vec2 mod289(vec2 x){return x-floor(x*(1./289.))*289.;}
+vec3 permute(vec3 x){return mod289(((x*34.)+1.)*x);}
+float snoise(vec2 v){
+    const vec4 C=vec4(0.211324865405187,0.366025403784439,-0.577350269189626,0.024390243902439);
+    vec2 i=floor(v+dot(v,C.yy)); vec2 x0=v-i+dot(i,C.xx);
+    vec2 i1=(x0.x>x0.y)?vec2(1.,0.):vec2(0.,1.);
+    vec4 x12=x0.xyxy+C.xxzz; x12.xy-=i1;
+    i=mod289(i); vec3 p=permute(permute(i.y+vec3(0.,i1.y,1.))+i.x+vec3(0.,i1.x,1.));
+    vec3 m=max(0.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.);
+    m=m*m; m=m*m;
+    vec3 x=2.*fract(p*C.www)-1.; vec3 h=abs(x)-0.5; vec3 ox=floor(x+0.5);
+    vec3 a0=x-ox; m*=1.79284291400159-0.85373472095314*(a0*a0+h*h);
+    vec3 g; g.x=a0.x*x0.x+h.x*x0.y; g.yz=a0.yz*x12.xz+h.yz*x12.yw;
+    return 130.*dot(m,g);
+}
+
+void main(){
+    vec3 mixedBase = mix(color, targetColor, uMorph);
+    vColor = mix(mixedBase, uCustomParticleColor, uParticleColorMode);
+    vec3 pos = mix(position, targetPosition, uMorph);
+    vec3 originalPos = pos;
+
+    float effectMix = uEffectIntensity;
+    int mode = uEffectMode;
+
+    if(mode == 0){ // default
+        float noise = sin(uTime*1.5+pos.x*0.3)*cos(uTime*1.5+pos.y*0.3);
+        pos += normalize(pos)*noise*(0.2*(1.-uMorph));
+    } else if(mode == 1){ // scatter
+        // ... (省略部分，可根据需要完整保留)
+    } // 其他特效可继续添加
+
+    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+    vDistance = length(pos);
+    gl_PointSize = (uPointSize / -mvPosition.z) * (1.2 + sin(uTime*3.+vDistance*0.15)*0.5);
+    gl_Position = projectionMatrix * mvPosition;
+}
+`;
+
+const fragmentShader = `
+uniform float uTime; uniform float uCanvasLightness;
+varying vec3 vColor; varying float vDistance;
+
+void main(){
+    float dist = distance(gl_PointCoord, vec2(0.5));
+    if(dist > 0.5) discard;
+    float strength = pow(1.0 - dist*2.0, 1.6);
+    vec3 finalColor = vColor * 2.0;
+    float alpha = strength * (0.8 + sin(vDistance*0.3 + uTime)*0.2);
+    gl_FragColor = vec4(finalColor, alpha);
+}
+`;
+
+// ==================== 动画循环 ====================
+const clock = new THREE.Clock();
+
+function animate() {
+    requestAnimationFrame(animate);
+    const elapsed = clock.getElapsedTime();
+
+    if (points) {
+        points.rotation.y = elapsed * 0.03;
+        material.uniforms.uTime.value = elapsed;
+        material.uniforms.uMorph.value = morphFactor;
+        material.uniforms.uEffectIntensity.value = effectIntensity;
+    }
+
+    sphere.rotation.x = elapsed * 0.015;
+    sphere.rotation.y = elapsed * 0.02;
+
+    renderer.render(scene, camera);
+}
+
+// ==================== 窗口调整 ====================
+window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+});
+
+// ==================== 初始化 ====================
+initParticles();
+animate();
+
+// ==================== 暴露控制接口（方便后续调用）===================
+window.particleSystem = {
+    setEffect: (effectName) => {
+        const modes = {default:0, scatter:1, explode:2, vortex:3, pulse:4, wave:5};
+        material.uniforms.uEffectMode.value = modes[effectName] || 0;
+        targetEffectIntensity = 1;
+    },
+    explode: () => {
+        explosionTriggered = true;
+        explosionTime = 0;
+        targetEffectIntensity = 1;
+    },
+    setMorph: (value) => { morphFactor = value; },
+    loadImage: (imgUrl) => { /* 调用 processImage */ }
+};
+</script>
